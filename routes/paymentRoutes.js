@@ -45,8 +45,6 @@ router.post(
       }
     }
 
-    console.log("unavailableStock", unavailableStock);
-
     if (unavailableStock.length > 0) {
       return next(
         new AppError(
@@ -95,12 +93,16 @@ router.post(
       cart,
     } = req.body;
 
-    const updatePayment = await PaymentModel.updateOne({
-      orderId: razorpayOrderId,
-      $set: {
-        payementStatus: "success",
-      },
-    });
+    const updatePayment = await PaymentModel.updateOne(
+      { orderId: razorpayOrderId },
+      { $set: { paymentStatus: "success" } }
+    );
+
+    const updatedPayment = await PaymentModel.findOneAndUpdate(
+      { orderId: razorpayOrderId },
+      { $set: { paymentStatus: "success" } },
+      { new: true }
+    );
 
     // logic to reduce stock
     const operations = cart.map((item) => {
@@ -116,10 +118,10 @@ router.post(
     const result = await ProductModel.bulkWrite(operations);
 
     // Empty the cart
-    const updateCart = await UserModel.updateOne({
-      _id: req.user._id,
-      $set: { cart: [] },
-    });
+    const updateCart = await UserModel.updateOne(
+      { _id: req.user._id },
+      { $set: { cart: [] } }
+    );
 
     res.status(200).json({
       staus: "success",
