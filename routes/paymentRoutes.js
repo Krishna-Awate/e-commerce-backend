@@ -20,10 +20,40 @@ router.post(
   "/payments/order",
   auth,
   catchAsync(async (req, res, next) => {
-    let { name, email, amount, phone, address } = req.body;
+    let { name, email, amount, phone, address, cart } = req.body;
 
-    if (!amount) {
-      return next(new AppError("No amount found", 500));
+    // Check stock availabilty with current purchase qunatity
+    const productIds = cart.map((item) => item.productId);
+    const products = await ProductModel.find({ _id: { $in: productIds } });
+
+    //  Map for easy lookup
+    const map = {};
+    products.forEach((el, i) => {
+      map[el._id] = el;
+    });
+
+    // Logic to get unavailable stock
+    const unavailableStock = [];
+    for (const item of cart) {
+      if (!map[item.productId]) {
+        return next(new AppError("Product not found", 404));
+      }
+      const stock = map[item.productId].stock;
+      const cartQuantity = item.quantity;
+      if (cartQuantity > stock) {
+        unavailableStock.push(item.name);
+      }
+    }
+
+    console.log("unavailableStock", unavailableStock);
+
+    if (unavailableStock.length > 0) {
+      return next(
+        new AppError(
+          `${unavailableStock.join(", ")} are out of stock now.`,
+          500
+        )
+      );
     }
     amount = +amount * 100;
 

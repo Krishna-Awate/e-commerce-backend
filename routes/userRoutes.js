@@ -78,9 +78,6 @@ router.post(
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
-    // Set the token as a cookie (add additional options for security)
-    // res.cookie("token", token, { httpOnly: true, SameSite: "none" });
-
     user.password = undefined;
 
     res
