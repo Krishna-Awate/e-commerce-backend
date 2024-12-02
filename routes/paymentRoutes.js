@@ -73,7 +73,7 @@ router.post(
       phone,
       address,
       orderId: response?.id,
-      payementStatus: response?.status,
+      paymentStatus: response?.status,
     });
     res.status(200).json({ status: "success", data: response });
   })
@@ -96,12 +96,6 @@ router.post(
     const updatePayment = await PaymentModel.updateOne(
       { orderId: razorpayOrderId },
       { $set: { paymentStatus: "success" } }
-    );
-
-    const updatedPayment = await PaymentModel.findOneAndUpdate(
-      { orderId: razorpayOrderId },
-      { $set: { paymentStatus: "success" } },
-      { new: true }
     );
 
     // logic to reduce stock

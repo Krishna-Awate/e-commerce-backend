@@ -26,7 +26,7 @@ const paymentSchema = new mongoose.Schema(
     orderId: {
       type: String,
     },
-    payementStatus: {
+    paymentStatus: {
       type: String,
     },
     productDetails: {
